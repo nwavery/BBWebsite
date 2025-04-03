@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title th:text="${team.name} + ' Details'">Team Details</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/3.3.7/css/bootstrap.min.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <!-- ... Navbar toggler ... -->
+                <button type="button" class="navbar-toggle collapsed"
+                        data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+                        aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#" th:href="@{\/">Blood Bowl Stats</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/teams}">Your Teams</a></li>
+                    <li><a th:href="@{/matches/new}">Record Match</a></li>
+                    <li><a th:href="@{/matches/history}">Match History</a></li>
+                    <li><a th:href="@{/matches/standings}">Standings</a></li>
+                    <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <br><br>
+
+    <div class="container">
+        <h1 th:text="${team.name}">Team Name</h1>
+        <p><strong th:text="${team.race}">Team Race</strong></p>
+
+        <!-- Player added/updated/deleted success message -->
+        <div th:if="${playerSuccess}" class="alert alert-success" role="alert"
+            th:text="${playerSuccess}">
+            Player action success
+        </div>
+
+         <!-- Player action error message -->
+        <div th:if="${playerError}" class="alert alert-danger" role="alert"
+            th:text="${playerError}">
+            Player action error
+        </div>
+
+        <!-- Error message if redirected with validation errors on add -->
+        <div th:if="${param.addPlayerError}" class="alert alert-danger">
+            Error adding player. Please check the form below.
+        </div>
+
+        <hr/>
+
+        <h2>Roster</h2>
+        <div th:if="${#lists.isEmpty(team.players)}">
+            <p>This team has no players yet.</p>
+        </div>
+
+        <div th:if="${not #lists.isEmpty(team.players)}">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Actions</th> <!-- Placeholder -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="player : ${team.players}">
+                        <td th:text="${player.name}">Player Name</td>
+                        <td th:text="${player.position}">Position</td>
+                        <td style="white-space: nowrap;">
+                            <!-- Edit Player Link -->
+                            <a th:href="@{/players/{id}/edit(id=${player.id})}" class="btn btn-warning btn-xs">Edit</a>
+                            <!-- Delete Player Form -->
+                            <form th:action="@{/players/{id}/delete(id=${player.id})}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this player?');">
+                                <button type="submit" class="btn btn-danger btn-xs">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <hr/>
+
+        <h2>Add New Player</h2>
+        <!-- We need a new controller endpoint to handle this form submission -->
+        <form th:action="@{/players}" th:object="${newPlayer}" method="post">
+             <!-- Hidden input to carry the teamId -->
+            <input type="hidden" th:field="*{teamId}" />
+
+            <div class="form-group">
+                <label for="playerName">Player Name</label>
+                <input type="text" class="form-control" id="playerName" th:field="*{name}" required />
+            </div>
+            <div class="form-group" th:classappend="${#fields.hasErrors('position')}? 'has-error' : ''">
+                <label for="playerPosition">Position</label>
+                 <!-- Changed from input to select -->
+                 <select id="playerPosition" class="form-control" th:field="*{position}" required>
+                     <option value="">-- Select Position --</option>
+                     <option th:each="posOpt : ${T(net.bst.springboot.springsecurity.model.Position).values()}"
+                             th:value="${posOpt}" th:text="${posOpt.displayName}">Position Name</option>
+                 </select>
+                 <p class="help-block" th:if="${#fields.hasErrors('position')}" th:errors="*{position}">Position Error</p>
+            </div>
+            <button type="submit" class="btn btn-success">Add Player</button>
+        </form>
+
+    </div>
+
+    <script type="text/javascript" th:src="@{/webjars/jquery/3.2.1/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/3.3.7/js/bootstrap.min.js}"></script>
+</body>
+</html> 

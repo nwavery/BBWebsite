@@ -1,0 +1,54 @@
+                <ul class="nav navbar-nav">
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li class="active"><a th:href="@{/teams}">Your Teams</a></li>
+                    <li><a th:href="@{/matches/new}">Record Match</a></li>
+                    <li><a th:href="@{/matches/history}">Match History</a></li>
+                    <li><a th:href="@{/matches/standings}">Standings</a></li>
+                    <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a></li>
+                </ul>
+
+                <div class="container">
+                    <h1>Your Teams</h1>
+
+                    <!-- Team creation success message -->
+                    <div th:if="${param.teamCreatedSuccess}" class="alert alert-success" role="alert">
+                        Team created successfully!
+                    </div>
+
+                     <!-- Team update success message -->
+                    <div th:if="${teamUpdateSuccess}" class="alert alert-success" role="alert"
+                         th:text="${teamUpdateSuccess}">
+                        Update success placeholder
+                    </div>
+
+                    <!-- Team delete success message -->
+                    <div th:if="${teamDeleteSuccess}" class="alert alert-success" role="alert"
+                         th:text="${teamDeleteSuccess}">
+                        Delete success placeholder
+                    </div>
+
+                    <!-- General error message (e.g., from delete failure) -->
+                    <div th:if="${errorMessage}" class="alert alert-danger" role="alert"
+                         th:text="${errorMessage}">
+                        Error placeholder
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(teams)}">
+                        <p>You haven't created any teams yet. <a th:href="@{/teams/new}">Create one now!</a></p>
+                    </div>
+                </div>
+
+                <tbody>
+                    <tr th:each="team : ${teams}">
+                        <td th:text="${team.name}">Team Name</td>
+                        <td th:text="${team.race}">Race</td>
+                        <td style="white-space: nowrap;"> <!-- Prevent buttons wrapping -->
+                            <a th:href="@{/teams/{id}(id=${team.id})}" class="btn btn-info btn-sm">Details</a>
+                            <a th:href="@{/teams/{id}/edit(id=${team.id})}" class="btn btn-warning btn-sm">Edit</a>
+                            <!-- Delete Button Form -->
+                            <form th:action="@{/teams/{id}/delete(id=${team.id})}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this team and all its players?');">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>

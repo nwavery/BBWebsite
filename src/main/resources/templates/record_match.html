@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Record Match Result</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/3.3.7/css/bootstrap.min.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
+    <!-- Add custom CSS if needed for styling -->
+    <style>
+        .team-section {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .team-section h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <!-- Navbar content (similar to other pages) -->
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed"
+                        data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+                        aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#" th:href="@{\/">Blood Bowl Stats</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/teams}">Your Teams</a></li>
+                    <li class="active"><a th:href="@{/matches/new}">Record Match</a></li>
+                    <li><a th:href="@{/matches/history}">Match History</a></li>
+                    <li><a th:href="@{/matches/standings}">Standings</a></li>
+                    <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <br><br>
+
+    <div class="container">
+        <h1>Record Match Result</h1>
+
+        <!-- Display general error messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert"
+             th:text="${errorMessage}">
+            Error placeholder
+        </div>
+
+        <form th:action="@{/matches}" th:object="${matchDto}" method="post">
+
+            <div class="row">
+                <!-- Team A Section -->
+                <div class="col-md-6">
+                    <div class="team-section">
+                        <h3>Team A</h3>
+                        <div class="form-group" th:classappend="${#fields.hasErrors('teamAId')}? 'has-error' : ''">
+                            <label for="teamAId">Select Team A</label>
+                            <select class="form-control" id="teamAId" th:field="*{teamAId}">
+                                <option value="">-- Select Team --</option>
+                                <option th:each="team : ${allTeams}" th:value="${team.id}" th:text="${team.name}">Team Name</option>
+                            </select>
+                            <p class="help-block" th:if="${#fields.hasErrors('teamAId')}" th:errors="*{teamAId}">Team A Error</p>
+                        </div>
+
+                        <div class="form-group" th:classappend="${#fields.hasErrors('scoreTeamA')}? 'has-error' : ''">
+                            <label for="scoreTeamA">Score Team A</label>
+                            <input type="number" class="form-control" id="scoreTeamA" th:field="*{scoreTeamA}" min="0" required />
+                             <p class="help-block" th:if="${#fields.hasErrors('scoreTeamA')}" th:errors="*{scoreTeamA}">Score A Error</p>
+                        </div>
+
+                        <div class="form-group" th:classappend="${#fields.hasErrors('touchdownsTeamA')}? 'has-error' : ''">
+                            <label for="touchdownsTeamA">Touchdowns Team A</label>
+                            <input type="number" class="form-control" id="touchdownsTeamA" th:field="*{touchdownsTeamA}" min="0" required />
+                            <p class="help-block" th:if="${#fields.hasErrors('touchdownsTeamA')}" th:errors="*{touchdownsTeamA}">TD A Error</p>
+                        </div>
+
+                        <div class="form-group" th:classappend="${#fields.hasErrors('casualtiesTeamA')}? 'has-error' : ''">
+                            <label for="casualtiesTeamA">Casualties Inflicted by Team A</label>
+                            <input type="number" class="form-control" id="casualtiesTeamA" th:field="*{casualtiesTeamA}" min="0" required />
+                            <p class="help-block" th:if="${#fields.hasErrors('casualtiesTeamA')}" th:errors="*{casualtiesTeamA}">CAS A Error</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team B Section -->
+                <div class="col-md-6">
+                     <div class="team-section">
+                        <h3>Team B</h3>
+                        <div class="form-group" th:classappend="${#fields.hasErrors('teamBId')}? 'has-error' : ''">
+                            <label for="teamBId">Select Team B</label>
+                            <select class="form-control" id="teamBId" th:field="*{teamBId}">
+                                <option value="">-- Select Team --</option>
+                                <option th:each="team : ${allTeams}" th:value="${team.id}" th:text="${team.name}">Team Name</option>
+                            </select>
+                             <p class="help-block" th:if="${#fields.hasErrors('teamBId')}" th:errors="*{teamBId}">Team B Error</p>
+                        </div>
+
+                        <div class="form-group" th:classappend="${#fields.hasErrors('scoreTeamB')}? 'has-error' : ''">
+                            <label for="scoreTeamB">Score Team B</label>
+                            <input type="number" class="form-control" id="scoreTeamB" th:field="*{scoreTeamB}" min="0" required />
+                            <p class="help-block" th:if="${#fields.hasErrors('scoreTeamB')}" th:errors="*{scoreTeamB}">Score B Error</p>
+                        </div>
+
+                         <div class="form-group" th:classappend="${#fields.hasErrors('touchdownsTeamB')}? 'has-error' : ''">
+                            <label for="touchdownsTeamB">Touchdowns Team B</label>
+                            <input type="number" class="form-control" id="touchdownsTeamB" th:field="*{touchdownsTeamB}" min="0" required />
+                            <p class="help-block" th:if="${#fields.hasErrors('touchdownsTeamB')}" th:errors="*{touchdownsTeamB}">TD B Error</p>
+                        </div>
+
+                        <div class="form-group" th:classappend="${#fields.hasErrors('casualtiesTeamB')}? 'has-error' : ''">
+                            <label for="casualtiesTeamB">Casualties Inflicted by Team B</label>
+                            <input type="number" class="form-control" id="casualtiesTeamB" th:field="*{casualtiesTeamB}" min="0" required />
+                            <p class="help-block" th:if="${#fields.hasErrors('casualtiesTeamB')}" th:errors="*{casualtiesTeamB}">CAS B Error</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                 <button type="submit" class="btn btn-primary">Record Match</button>
+                 <a th:href="@{/}" class="btn btn-default">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script type="text/javascript" th:src="@{/webjars/jquery/3.2.1/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/3.3.7/js/bootstrap.min.js}"></script>
+</body>
+</html> 

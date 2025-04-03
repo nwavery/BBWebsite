@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Match History</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/3.3.7/css/bootstrap.min.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <!-- Navbar content -->
+        <div class="container">
+             <div class="navbar-header">
+                 <button type="button" class="navbar-toggle collapsed"
+                         data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+                         aria-controls="navbar">
+                     <span class="sr-only">Toggle navigation</span>
+                     <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+                 </button>
+                 <a class="navbar-brand" href="#" th:href="@{\/">Blood Bowl Stats</a>
+             </div>
+             <div id="navbar" class="collapse navbar-collapse">
+                 <ul class="nav navbar-nav">
+                     <li><a th:href="@{/}">Home</a></li>
+                     <li><a th:href="@{/teams}">Your Teams</a></li>
+                     <li><a th:href="@{/matches/new}">Record Match</a></li>
+                     <li class="active"><a th:href="@{/matches/history}">Match History</a></li>
+                     <li><a th:href="@{/matches/standings}">Standings</a></li>
+                     <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a></li>
+                 </ul>
+             </div>
+         </div>
+    </nav>
+
+    <br><br>
+
+    <div class="container">
+        <h1>Match History</h1>
+
+        <!-- Success message after recording a match -->
+        <div th:if="${matchSuccess}" class="alert alert-success" role="alert"
+             th:text="${matchSuccess}">
+            Success placeholder
+        </div>
+
+        <div th:if="${#lists.isEmpty(matches)}">
+            <p>No matches have been recorded yet. <a th:href="@{/matches/new}">Record one now!</a></p>
+        </div>
+
+        <div th:if="${not #lists.isEmpty(matches)}">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Date</th>
+                        <th>Team A</th>
+                        <th>Score A</th>
+                        <th>TDs A</th>
+                        <th>CAS A</th>
+                        <th>Team B</th>
+                        <th>Score B</th>
+                        <th>TDs B</th>
+                        <th>CAS B</th>
+                        <th>Result</th> <!-- Derived from scores -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="match : ${matches}">
+                        <td th:text="${#temporals.format(match.matchDate, 'yyyy-MM-dd HH:mm')}">Date</td>
+                        <td th:text="${match.teamA.name}">Team A</td>
+                        <td th:text="${match.scoreTeamA}">Score A</td>
+                        <td th:text="${match.touchdownsTeamA}">TDs A</td>
+                        <td th:text="${match.casualtiesTeamA}">CAS A</td>
+                        <td th:text="${match.teamB.name}">Team B</td>
+                        <td th:text="${match.scoreTeamB}">Score B</td>
+                        <td th:text="${match.touchdownsTeamB}">TDs B</td>
+                        <td th:text="${match.casualtiesTeamB}">CAS B</td>
+                        <td>
+                            <span th:if="${match.scoreTeamA > match.scoreTeamB}" th:text="${match.teamA.name} + ' Win'" class="label label-success">Win</span>
+                            <span th:if="${match.scoreTeamB > match.scoreTeamA}" th:text="${match.teamB.name} + ' Win'" class="label label-success">Win</span>
+                            <span th:if="${match.scoreTeamA == match.scoreTeamB}" class="label label-warning">Draw</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+             <p>
+                 <a th:href="@{/matches/new}" class="btn btn-primary">Record Another Match</a>
+            </p>
+        </div>
+    </div>
+
+    <script type="text/javascript" th:src="@{/webjars/jquery/3.2.1/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/3.3.7/js/bootstrap.min.js}"></script>
+</body>
+</html> 
