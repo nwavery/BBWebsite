@@ -14,29 +14,45 @@ import org.springframework.stereotype.Service;
 
 import net.bst.springboot.springsecurity.model.Role;
 import net.bst.springboot.springsecurity.model.User;
+import net.bst.springboot.springsecurity.repository.RoleRepository;
 import net.bst.springboot.springsecurity.repository.UserRepository;
 import net.bst.springboot.springsecurity.web.dto.UserRegistrationDto;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    public UserServiceImpl(UserRepository userRepository,
+                           BCryptPasswordEncoder passwordEncoder,
+                           RoleRepository roleRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+    }
 
-    public User findByEmail(String email){
+    @Override
+    public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public User save(UserRegistrationDto registration){
+    @Override
+    public User save(UserRegistrationDto registration) {
+        Role userRole = roleRepository.findByName("ROLE_USER");
+        if (userRole == null) {
+            userRole = new Role("ROLE_USER");
+            roleRepository.save(userRole);
+        }
+
         User user = new User();
         user.setFirstName(registration.getFirstName());
         user.setLastName(registration.getLastName());
         user.setEmail(registration.getEmail());
         user.setPassword(passwordEncoder.encode(registration.getPassword()));
-        user.setRoles(Arrays.asList(new Role("ROLE_USER")));
+        user.setRoles(Arrays.asList(userRole));
         return userRepository.save(user);
     }
 

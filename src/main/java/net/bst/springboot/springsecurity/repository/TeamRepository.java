@@ -12,6 +12,12 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     // Find all teams associated with a specific user ID
     List<Team> findByUserId(Long userId);
 
+    // Check if a team name exists for a specific user
+    boolean existsByNameAndUserId(String name, Long userId);
+
+    // Check if a team name exists for a specific user, excluding a specific team ID (for updates)
+    boolean existsByNameAndUserIdAndIdNot(String name, Long userId, Long teamIdToExclude);
+
     // We might add custom query methods here later, e.g.:
     // Optional<Team> findByName(String name);
 } 

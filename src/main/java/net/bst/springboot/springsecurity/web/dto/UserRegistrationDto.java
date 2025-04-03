@@ -6,10 +6,7 @@ import javax.validation.constraints.NotEmpty;
 
 import net.bst.springboot.springsecurity.constraint.FieldMatch;
 
-@FieldMatch.List({
-        @FieldMatch(first = "password", second = "confirmPassword", message = "The password fields must match"),
-        @FieldMatch(first = "email", second = "confirmEmail", message = "The email fields must match")
-})
+@FieldMatch(first = "password", second = "confirmPassword", message = "The password fields must match")
 public class UserRegistrationDto {
 
     @NotEmpty
@@ -28,11 +25,7 @@ public class UserRegistrationDto {
     @NotEmpty
     private String email;
 
-    @Email
-    @NotEmpty
-    private String confirmEmail;
-
-    @AssertTrue
+    @AssertTrue(message = "You must agree to the terms and conditions")
     private Boolean terms;
 
     public String getFirstName() {
@@ -73,14 +66,6 @@ public class UserRegistrationDto {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getConfirmEmail() {
-        return confirmEmail;
-    }
-
-    public void setConfirmEmail(String confirmEmail) {
-        this.confirmEmail = confirmEmail;
     }
 
     public Boolean getTerms() {

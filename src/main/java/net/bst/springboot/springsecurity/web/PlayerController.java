@@ -29,30 +29,34 @@ public class PlayerController {
                             RedirectAttributes redirectAttributes) {
 
          if (result.hasErrors()) {
-            // If validation errors on add, redirect back to team details with errors
-            // We need the teamId to redirect correctly
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.newPlayer", result);
             redirectAttributes.addFlashAttribute("newPlayer", playerDto);
-            // Ensure teamId is present in the DTO for redirect
             if (playerDto.getTeamId() == null) {
-                // Handle error - teamId should always be present from the form
                 redirectAttributes.addFlashAttribute("playerError", "Cannot add player: Team ID missing.");
-                return "redirect:/teams"; // Redirect somewhere sensible
+                return "redirect:/teams";
             }
             return "redirect:/teams/" + playerDto.getTeamId() + "?addPlayerError";
         }
 
         try {
             Player savedPlayer = playerService.save(playerDto);
-            redirectAttributes.addFlashAttribute("playerSuccess", "Player added successfully!");
-            // Redirect back to the team details page using the ID from the *saved* player's team
+            redirectAttributes.addFlashAttribute("playerSuccess", "Player '".concat(savedPlayer.getName()).concat("' added successfully!"));
             return "redirect:/teams/" + savedPlayer.getTeam().getId();
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("playerError", e.getMessage());
+            redirectAttributes.addFlashAttribute("newPlayer", playerDto);
+            if (playerDto.getTeamId() != null) {
+                return "redirect:/teams/" + playerDto.getTeamId() + "?addPlayerError";
+            } else {
+                return "redirect:/teams";
+            }
         } catch (Exception e) {
              redirectAttributes.addFlashAttribute("playerError", "Error adding player: " + e.getMessage());
+             redirectAttributes.addFlashAttribute("newPlayer", playerDto);
              if (playerDto.getTeamId() != null) {
                  return "redirect:/teams/" + playerDto.getTeamId() + "?addPlayerError";
              } else {
-                 return "redirect:/teams"; // Fallback redirect
+                 return "redirect:/teams";
              }
         }
     }
@@ -86,24 +90,26 @@ public class PlayerController {
                                BindingResult result,
                                RedirectAttributes redirectAttributes) {
 
-        Long teamId = playerDto.getTeamId(); // Get teamId before potential errors
+        Long teamId = playerDto.getTeamId();
 
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.playerDto", result);
             redirectAttributes.addFlashAttribute("playerDto", playerDto);
-             // Need playerId for redirect URL
             return "redirect:/players/" + playerId + "/edit?error";
         }
 
         try {
             playerService.updatePlayer(playerId, playerDto);
             redirectAttributes.addFlashAttribute("playerSuccess", "Player updated successfully!");
-            // Redirect back to the team details page
             if (teamId == null) {
-                 // Should have teamId from the form DTO
                  throw new IllegalStateException("Team ID missing during player update.");
             }
             return "redirect:/teams/" + teamId;
+        } catch (IllegalArgumentException e) {
+            // Handle custom validation errors (e.g., duplicate name)
+             redirectAttributes.addFlashAttribute("playerError", e.getMessage());
+             redirectAttributes.addFlashAttribute("playerDto", playerDto);
+             return "redirect:/players/" + playerId + "/edit?error";
         } catch (Exception e) {
              redirectAttributes.addFlashAttribute("playerError", "Error updating player: " + e.getMessage());
              redirectAttributes.addFlashAttribute("playerDto", playerDto);

@@ -1,8 +1,10 @@
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\constraint\FieldMatch.java
+C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\model\Position.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\web\UserRegistrationController.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\repository\MatchRepository.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\service\MatchServiceImpl.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\service\TeamService.java
+C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\repository\RoleRepository.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\model\Match.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\repository\TeamRepository.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\service\MatchService.java
@@ -27,7 +29,9 @@ C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springb
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\service\TeamServiceImpl.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\web\dto\TeamDto.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\web\PlayerController.java
+C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\config\PasswordEncoderConfig.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\web\dto\TeamStatsDto.java
+C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\model\Race.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\web\MainController.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\model\Player.java
 C:\Users\nwave\OneDrive\Documents\GitHub\BBWebsite\src\main\java\net\bst\springboot\springsecurity\repository\PlayerRepository.java

@@ -32,21 +32,25 @@ public class TeamServiceImpl implements TeamService {
     private MatchRepository matchRepository; // Inject MatchRepository
 
     @Override
+    @Transactional
     public Team save(TeamDto teamDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName(); // Get username of logged-in user
+        String username = auth.getName();
         User user = userRepository.findByEmail(username);
 
         if (user == null) {
-            // Handle case where user is not found, maybe throw an exception
-            // For now, we'll return null or throw a simple exception
             throw new RuntimeException("User not found: " + username);
+        }
+
+        // Validation: Check if team name is unique for this user
+        if (teamRepository.existsByNameAndUserId(teamDto.getName(), user.getId())) {
+            throw new IllegalArgumentException("Team name '" + teamDto.getName() + "' already exists for this user.");
         }
 
         Team team = new Team();
         team.setName(teamDto.getName());
         team.setRace(teamDto.getRace());
-        team.setUser(user); // Associate team with the logged-in user
+        team.setUser(user);
 
         return teamRepository.save(team);
     }
@@ -93,17 +97,19 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    @Transactional // Ensure transactional for update
+    @Transactional
     public Team update(Long id, TeamDto teamDto) {
-        // Find the existing team, ensuring the current user owns it
         Team existingTeam = findTeamByIdForCurrentUser(id)
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + id + " or access denied"));
 
-        // Update fields from DTO
-        // Consider adding validation to prevent changing name to one that already exists (excluding itself)
+        // Validation: Check if the new name is unique for this user (excluding the current team)
+        if (!existingTeam.getName().equals(teamDto.getName()) &&
+             teamRepository.existsByNameAndUserIdAndIdNot(teamDto.getName(), existingTeam.getUser().getId(), id)) {
+            throw new IllegalArgumentException("Team name '" + teamDto.getName() + "' already exists for this user.");
+        }
+
         existingTeam.setName(teamDto.getName());
         existingTeam.setRace(teamDto.getRace());
-        // Do NOT update the user association here
 
         return teamRepository.save(existingTeam);
     }

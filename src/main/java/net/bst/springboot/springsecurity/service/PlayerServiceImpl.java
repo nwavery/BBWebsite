@@ -32,22 +32,20 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional // Ensure this runs within a transaction
     public Player save(PlayerDto playerDto) {
-        // Find the team the player should be added to
         Team team = teamRepository.findById(playerDto.getTeamId())
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + playerDto.getTeamId()));
-
-        // Authorization check: ensure the logged-in user owns this team
         checkUserOwnsTeam(team);
+
+        // Validation: Check if player name is unique for this team
+        if (playerRepository.existsByNameAndTeamId(playerDto.getName(), team.getId())) {
+            throw new IllegalArgumentException("Player name '" + playerDto.getName() + "' already exists on this team.");
+        }
 
         Player player = new Player();
         player.setName(playerDto.getName());
         player.setPosition(playerDto.getPosition());
-        player.setTeam(team); // Associate player with the team
+        player.setTeam(team);
 
-        // Note: Because of the cascade setting on Team.players and the @Transactional,
-        // we might not strictly need playerRepository.save(player) if we were modifying
-        // the Team entity directly (e.g., team.addPlayer(player); teamRepository.save(team)).
-        // However, saving the player directly is clear and works well.
         return playerRepository.save(player);
     }
 
@@ -62,14 +60,16 @@ public class PlayerServiceImpl implements PlayerService {
     public Player updatePlayer(Long playerId, PlayerDto playerDto) {
         Player existingPlayer = playerRepository.findById(playerId)
                 .orElseThrow(() -> new EntityNotFoundException("Player not found with id: " + playerId));
-
-        // Authorization check: Ensure user owns the team this player belongs to
         checkUserOwnsTeam(existingPlayer.getTeam());
 
-        // Update fields
+        // Validation: Check if the new name is unique for this team (excluding the current player)
+        if (!existingPlayer.getName().equals(playerDto.getName()) &&
+            playerRepository.existsByNameAndTeamIdAndIdNot(playerDto.getName(), existingPlayer.getTeam().getId(), playerId)) {
+             throw new IllegalArgumentException("Player name '" + playerDto.getName() + "' already exists on this team.");
+        }
+
         existingPlayer.setName(playerDto.getName());
         existingPlayer.setPosition(playerDto.getPosition());
-        // Do not change the team association here; that might require a different operation
 
         return playerRepository.save(existingPlayer);
     }

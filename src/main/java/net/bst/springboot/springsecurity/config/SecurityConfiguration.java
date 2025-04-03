@@ -1,68 +1,76 @@
 package net.bst.springboot.springsecurity.config;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import net.bst.springboot.springsecurity.service.UserService;
 
 @Configuration
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter
+@EnableWebSecurity
+public class SecurityConfiguration
 {
+	private final UserService userService;
+
 	@Autowired
-	UserService userService;
+	public SecurityConfiguration(UserService userService)
+	{
+		this.userService = userService;
+	}
 
 	// providing access to some type of urls for reg ,login, css, jss,html images etc
-  @Override
-  protected void configure(HttpSecurity http) throws Exception
-  {
-	  http
-	  			.authorizeRequests()
-	  					.antMatchers(
-	  							"/registration**",
-	  							"/js",
-	  							"/css",
-	  							"/img",
-	  							"/webjars/**").permitAll()
-	  						.anyRequest().authenticated()
-	  				.and()
-	  					.formLogin()
-	  						.loginPage("/login")
-	  							.permitAll()
-	  				.and()
-	  					.logout()
-	  							.invalidateHttpSession(true)
-	  							.clearAuthentication(true)
-	  							.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-	  							.logoutSuccessUrl("/login?logout")
-	  				.permitAll();
+	// Remove the PasswordEncoder bean from here, it's moved to PasswordEncoderConfig
+	/*
+	@Bean
+	public BCryptPasswordEncoder passwordEncoder()
+	{
+		return new BCryptPasswordEncoder();
+	}
+	*/
 
-  }
-  
-@Bean
-public BCryptPasswordEncoder passwordEncoder()
-{
-	return new BCryptPasswordEncoder();
-}
-@Bean
-public DaoAuthenticationProvider authencationProvider()
-{
-	DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
-	auth.setUserDetailsService(userService);
-	// you can add more servics here...
-	auth.setPasswordEncoder(passwordEncoder());
-	return auth;
-}
-@Override
-protected void configure(AuthenticationManagerBuilder auth)
-{
-	auth.authenticationProvider(authencationProvider());
-}
+	@Bean
+	public DaoAuthenticationProvider authenticationProvider(BCryptPasswordEncoder passwordEncoder)
+	{
+		DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
+		auth.setUserDetailsService(userService);
+		auth.setPasswordEncoder(passwordEncoder);
+		return auth;
+	}
+
+	// Define the SecurityFilterChain bean
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception
+	{
+		http
+				.authorizeRequests(authorize -> authorize
+						.antMatchers(
+								"/registration**",
+								"/js/**",
+								"/css/**",
+								"/img/**",
+								"/webjars/**"
+						).permitAll()
+						.anyRequest().authenticated()
+				)
+				.formLogin(formLogin -> formLogin
+						.loginPage("/login")
+						.permitAll()
+				)
+				.logout(logout -> logout
+						.invalidateHttpSession(true)
+						.clearAuthentication(true)
+						.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+						.logoutSuccessUrl("/login?logout")
+						.permitAll()
+				);
+		// Authentication provider setup is handled by the DaoAuthenticationProvider bean
+
+		return http.build();
+	}
 }

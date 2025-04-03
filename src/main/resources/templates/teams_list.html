@@ -1,54 +1,94 @@
-                <ul class="nav navbar-nav">
-                    <li><a th:href="@{/}">Home</a></li>
-                    <li class="active"><a th:href="@{/teams}">Your Teams</a></li>
-                    <li><a th:href="@{/matches/new}">Record Match</a></li>
-                    <li><a th:href="@{/matches/history}">Match History</a></li>
-                    <li><a th:href="@{/matches/standings}">Standings</a></li>
-                    <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a></li>
-                </ul>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-                <div class="container">
-                    <h1>Your Teams</h1>
+    <title>Your Teams</title>
 
-                    <!-- Team creation success message -->
-                    <div th:if="${param.teamCreatedSuccess}" class="alert alert-success" role="alert">
-                        Team created successfully!
-                    </div>
+    <!-- Updated BS5 CSS -->
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
+</head>
+<body>
+    <!-- Updated BS5 Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+             <a class="navbar-brand" th:href="@{/}">Blood Bowl Stats</a>
+             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+                 <span class="navbar-toggler-icon"></span>
+             </button>
+             <div class="collapse navbar-collapse" id="navbarColor02">
+                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
+                    <li class="nav-item active"><a class="nav-link" th:href="@{/teams}">Your Teams</a> <span class="visually-hidden">(current)</span></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/matches/new}">Record Match</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/matches/history}">Match History</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/matches/standings}">Standings</a></li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()"><a class="nav-link" th:href="@{/logout}">Logout</a></li>
+                 </ul>
+             </div>
+         </div>
+    </nav>
 
-                     <!-- Team update success message -->
-                    <div th:if="${teamUpdateSuccess}" class="alert alert-success" role="alert"
-                         th:text="${teamUpdateSuccess}">
-                        Update success placeholder
-                    </div>
+    <div class="container" style="padding-top: 70px;">
+        <h1>Your Teams</h1>
 
-                    <!-- Team delete success message -->
-                    <div th:if="${teamDeleteSuccess}" class="alert alert-success" role="alert"
-                         th:text="${teamDeleteSuccess}">
-                        Delete success placeholder
-                    </div>
+        <!-- Updated BS5 Alerts -->
+        <div th:if="${param.teamCreatedSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+            Team created successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${teamUpdateSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+             <span th:text="${teamUpdateSuccess}">Update success placeholder</span>
+             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${teamDeleteSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+             <span th:text="${teamDeleteSuccess}">Delete success placeholder</span>
+             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+             <span th:text="${errorMessage}">Error placeholder</span>
+             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
 
-                    <!-- General error message (e.g., from delete failure) -->
-                    <div th:if="${errorMessage}" class="alert alert-danger" role="alert"
-                         th:text="${errorMessage}">
-                        Error placeholder
-                    </div>
+        <div th:if="${#lists.isEmpty(teams)}">
+            <p>You haven't created any teams yet. <a th:href="@{/teams/new}">Create one now!</a></p>
+        </div>
 
-                    <div th:if="${#lists.isEmpty(teams)}">
-                        <p>You haven't created any teams yet. <a th:href="@{/teams/new}">Create one now!</a></p>
-                    </div>
-                </div>
-
+        <div th:if="${not #lists.isEmpty(teams)}">
+            <table class="table table-striped table-bordered table-hover">
+                <thead class="table-dark"> <!-- Updated BS5 thead class -->
+                    <tr>
+                        <th>Team Name</th>
+                        <th>Race</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
                 <tbody>
                     <tr th:each="team : ${teams}">
                         <td th:text="${team.name}">Team Name</td>
-                        <td th:text="${team.race}">Race</td>
-                        <td style="white-space: nowrap;"> <!-- Prevent buttons wrapping -->
+                        <td th:text="${team.race.displayName}">Race</td> <!-- Use displayName -->
+                        <td class="text-nowrap"> <!-- Updated BS5 class -->
                             <a th:href="@{/teams/{id}(id=${team.id})}" class="btn btn-info btn-sm">Details</a>
                             <a th:href="@{/teams/{id}/edit(id=${team.id})}" class="btn btn-warning btn-sm">Edit</a>
-                            <!-- Delete Button Form -->
-                            <form th:action="@{/teams/{id}/delete(id=${team.id})}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this team and all its players?');">
+                            <form th:action="@{/teams/{id}/delete(id=${team.id})}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this team and all its players? Note: Team cannot be deleted if it has played matches.');">
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>
                         </td>
                     </tr>
                 </tbody>
+            </table>
+            <p>
+                 <a th:href="@{/teams/new}" class="btn btn-primary">Create Another Team</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Updated Bootstrap 5 JS Bundle -->
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
+</body>
+</html>

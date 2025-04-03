@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -8,88 +8,78 @@
 
     <title>Edit Team</title>
 
-    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/3.3.7/css/bootstrap.min.css}" />
+    <!-- Updated BS5 CSS -->
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
     <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
 </head>
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <!-- Navbar content -->
+    <!-- Updated BS5 Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
-             <div class="navbar-header">
-                 <button type="button" class="navbar-toggle collapsed"
-                         data-toggle="collapse" data-target="#navbar" aria-expanded="false"
-                         aria-controls="navbar">
-                     <span class="sr-only">Toggle navigation</span>
-                     <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
-                 </button>
-                 <a class="navbar-brand" href="#" th:href="@{\/">Blood Bowl Stats</a>
-             </div>
-             <div id="navbar" class="collapse navbar-collapse">
-                 <ul class="nav navbar-nav">
-                     <li><a th:href="@{/}">Home</a></li>
-                     <li><a th:href="@{/teams}">Your Teams</a></li>
-                     <li><a th:href="@{/matches/new}">Record Match</a></li>
-                     <li><a th:href="@{/matches/history}">Match History</a></li>
-                     <li><a th:href="@{/matches/standings}">Standings</a></li>
-                     <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a></li>
+             <a class="navbar-brand" th:href="@{/}">Blood Bowl Stats</a>
+             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+                 <span class="navbar-toggler-icon"></span>
+             </button>
+             <div class="collapse navbar-collapse" id="navbarColor02">
+                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                     <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
+                     <li class="nav-item"><a class="nav-link" th:href="@{/teams}">Your Teams</a></li>
+                     <li class="nav-item"><a class="nav-link" th:href="@{/matches/new}">Record Match</a></li>
+                     <li class="nav-item"><a class="nav-link" th:href="@{/matches/history}">Match History</a></li>
+                     <li class="nav-item"><a class="nav-link" th:href="@{/matches/standings}">Standings</a></li>
+                     <li class="nav-item" sec:authorize="isAuthenticated()"><a class="nav-link" th:href="@{/logout}">Logout</a></li>
                  </ul>
              </div>
          </div>
     </nav>
 
-    <br><br>
-
-    <div class="container">
+    <div class="container" style="padding-top: 70px;">
         <div class="row">
-            <div class="col-md-6 col-md-offset-3">
+            <div class="col-md-6 offset-md-3">
 
                 <h1>Edit Team</h1>
 
-                 <!-- Display general error messages -->
-                <div th:if="${errorMessage}" class="alert alert-danger" role="alert"
-                    th:text="${errorMessage}">
-                     Error placeholder
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${errorMessage}">Error placeholder</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-
-                <!-- Error message if redirected with validation errors -->
-                 <div th:if="${param.error}" class="alert alert-danger">
+                <div th:if="${param.error}" class="alert alert-warning alert-dismissible fade show" role="alert">
                     There were errors with your submission. Please check the fields below.
+                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
-                <!-- Pass teamId in the action URL -->
                 <form th:action="@{/teams/{id}(id=${teamId})}" th:object="${teamDto}" method="post">
-
-                    <!-- Display validation errors -->
-                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
-                        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Global error</p>
+                    <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+                        Please correct the errors below.
                     </div>
 
-                    <div class="form-group" th:classappend="${#fields.hasErrors('name')}? 'has-error' : ''">
-                        <label class="control-label" for="name"> Team Name </label>
+                    <div class="mb-3">
+                        <label class="form-label" for="name"> Team Name </label>
                         <input id="name" class="form-control" th:field="*{name}" required autofocus="autofocus" />
-                        <p class="help-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</p>
+                        <p class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
                     </div>
 
-                    <div class="form-group" th:classappend="${#fields.hasErrors('race')}? 'has-error' : ''">
-                        <label class="control-label" for="race"> Race </label>
-                        <select id="race" class="form-control" th:field="*{race}" required>
+                    <div class="mb-3">
+                        <label class="form-label" for="race"> Race </label>
+                        <select id="race" class="form-select" th:field="*{race}" required>
                             <option value="">-- Select Race --</option>
                             <option th:each="raceOpt : ${T(net.bst.springboot.springsecurity.model.Race).values()}"
                                     th:value="${raceOpt}" th:text="${raceOpt.displayName}">Race Name</option>
                         </select>
-                         <p class="help-block" th:if="${#fields.hasErrors('race')}" th:errors="*{race}">Race Error</p>
+                        <p class="text-danger" th:if="${#fields.hasErrors('race')}" th:errors="*{race}"></p>
                     </div>
 
-                    <div class="form-group">
+                    <div class="mb-3">
                         <button type="submit" class="btn btn-primary">Update Team</button>
-                        <a th:href="@{/teams}" class="btn btn-default">Cancel</a>
+                        <a th:href="@{/teams}" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <script type="text/javascript" th:src="@{/webjars/jquery/3.2.1/jquery.min.js}"></script>
-    <script type="text/javascript" th:src="@{/webjars/bootstrap/3.3.7/js/bootstrap.min.js}"></script>
+    <!-- Updated Bootstrap 5 JS Bundle -->
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+    <script type="text/javascript" th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
 </body>
 </html> 

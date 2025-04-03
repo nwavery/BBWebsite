@@ -41,9 +41,39 @@ public class TeamController {
 
     // Handler method to process the team creation form submission
     @PostMapping
-    public String createTeam(@ModelAttribute("team") TeamDto teamDto) {
-        teamService.save(teamDto);
-        return "redirect:/teams?teamCreatedSuccess"; // Redirect to list view
+    public String createTeam(@Valid @ModelAttribute("team") TeamDto teamDto,
+                             BindingResult result,
+                             RedirectAttributes redirectAttributes,
+                             Model model) {
+
+         if (result.hasErrors()) {
+             // If standard validation fails, RETURN view directly, not redirect
+             // No need for RedirectAttributes here
+             model.addAttribute("team", teamDto); // Add DTO back to model for repopulation
+             // BindingResult is automatically added to the model by Spring when returning view name
+             return "create_team"; // Return view name directly
+         }
+
+        try {
+            teamService.save(teamDto);
+            redirectAttributes.addFlashAttribute("teamCreatedSuccess", "Team created successfully!");
+            return "redirect:/teams"; // Redirect to list view on SUCCESS
+        } catch (IllegalArgumentException e) {
+            // Handle custom validation errors (e.g., duplicate name)
+            // Remove RedirectAttributes usage
+            model.addAttribute("errorMessage", e.getMessage()); // Add error to Model
+            model.addAttribute("team", teamDto); // Add DTO back to Model
+            return "create_team"; // Return view name directly
+        } catch (Exception e) {
+            // Handle other unexpected errors
+            // Add logging to see the actual exception
+            System.err.println("Caught generic exception during team creation: " + e.getMessage());
+            e.printStackTrace(); // Print stack trace to console
+
+            model.addAttribute("errorMessage", "Error creating team: An unexpected error occurred."); // Add error to Model
+            model.addAttribute("team", teamDto); // Add DTO back to Model
+            return "create_team"; // Return view name directly
+        }
     }
 
     // Handler method to list teams for the current user
@@ -97,14 +127,10 @@ public class TeamController {
     @PostMapping("/{id}")
     public String updateTeam(@PathVariable Long id,
                              @Valid @ModelAttribute("teamDto") TeamDto teamDto,
-                             BindingResult result, // Add validation if needed
+                             BindingResult result,
                              RedirectAttributes redirectAttributes) {
 
-        // Add validation checks if needed (e.g., @Valid, BindingResult)
          if (result.hasErrors()) {
-             // Return to edit form if errors
-             // Need to add teamId back to model for the form action URL
-             // model.addAttribute("teamId", id); // No need if using redirectAttributes
              redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.teamDto", result);
              redirectAttributes.addFlashAttribute("teamDto", teamDto);
              return "redirect:/teams/" + id + "/edit?error";
@@ -113,9 +139,14 @@ public class TeamController {
         try {
             teamService.update(id, teamDto);
             redirectAttributes.addFlashAttribute("teamUpdateSuccess", "Team updated successfully!");
-            return "redirect:/teams"; // Redirect to the team list page
+            return "redirect:/teams";
+        } catch (IllegalArgumentException e) {
+             // Handle custom validation errors (e.g., duplicate name)
+             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+             redirectAttributes.addFlashAttribute("teamDto", teamDto); // Send DTO back
+             return "redirect:/teams/" + id + "/edit?error";
         } catch (Exception e) {
-            // Handle errors (e.g., concurrency, validation)
+            // Handle other errors
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating team: " + e.getMessage());
             redirectAttributes.addFlashAttribute("teamDto", teamDto);
             return "redirect:/teams/" + id + "/edit?error";
