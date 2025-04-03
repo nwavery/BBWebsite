@@ -10,6 +10,7 @@ net\bst\springboot\springsecurity\Application.class
 net\bst\springboot\springsecurity\web\UserRegistrationController.class
 net\bst\springboot\springsecurity\model\Team.class
 net\bst\springboot\springsecurity\repository\TeamRepository.class
+net\bst\springboot\springsecurity\repository\RoleRepository.class
 net\bst\springboot\springsecurity\repository\UserRepository.class
 net\bst\springboot\springsecurity\service\TeamServiceImpl.class
 net\bst\springboot\springsecurity\web\dto\TeamDto.class
